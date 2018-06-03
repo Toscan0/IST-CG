@@ -2,17 +2,17 @@
 function intersect(a, b) {
     'use strict';
 
-    return  (a.position.x - 4 <= b.position.x + 4 && a.position.x + 4 >= b.position.x - 4) && 
-    (a.position.y - 4 <= b.position.y + 2 && a.position.y + 2 >= b.position.y - 4);
+    return  (a.position.x - 4.1<= b.position.x + 4.1 && a.position.x + 4.1 >= b.position.x - 4.1) && 
+    (a.position.y - 4.1 <= b.position.y + 2.1 && a.position.y + 2.1 >= b.position.y - 4.1);
 }
    
 function intersectBala(bala, alien){
     'use strict';
        
   // get box closest point to sphere center by clamping
-  var x = Math.max(alien.position.x - 4, Math.min(bala.position.x, alien.position.x + 4));
-  var y = Math.max(alien.position.y - 4, Math.min(bala.position.y, alien.position.y + 2));
-  var z = Math.max(alien.position.z - 3, Math.min(bala.position.z, alien.position.z + 3));
+  var x = Math.max(alien.position.x - 4.1, Math.min(bala.position.x, alien.position.x + 4.1));
+  var y = Math.max(alien.position.y - 4.1, Math.min(bala.position.y, alien.position.y + 2.1));
+  var z = Math.max(alien.position.z - 3.1, Math.min(bala.position.z, alien.position.z + 3.1));
  
   // this is the same as isPointInsideSphere
   var distance = Math.sqrt((x - bala.position.x) * (x - bala.position.x) +
@@ -88,15 +88,15 @@ function moveInvader(){
         invaderList[i].inv.position.y +=  invaderList[i].speedYY*t;
 
         //limite lateral direito
-        if(invaderList[i].inv.position.x >= limite-4.1){
+        if(invaderList[i].inv.position.x >= limite-5){
             invaderList[i].speedXX = -invaderList[i].speedXX;
         }
         //limite lateral esquerdo
-        if(invaderList[i].inv.position.x <= -limite+4.1){
+        if(invaderList[i].inv.position.x <= -limite+5){
             invaderList[i].speedXX = -invaderList[i].speedXX;
         }
         //limite lateral superior
-        if(invaderList[i].inv.position.y >= limite-1.5){
+        if(invaderList[i].inv.position.y >= limite-5){
             invaderList[i].speedYY = -invaderList[i].speedYY;
         }
         //limite lateral inferior

@@ -3,24 +3,52 @@
 function onKeyDown(e){
 	'use strict';
 
+	var i;
 	switch (e.keyCode) {
 	//se a tecla 'a' ou 'A' for premida alterna entre os modelos de arame e solidos
 	case 65: //A
 	case 97: //a
-		scene.traverse(function (node){
-            if (node instanceof THREE.Mesh) {
-                node.material.wireframe = !node.material.wireframe;
-            }
-        });
-        materialCampo.wireframe = false;
-		//materialNave.wireframe = !materialNave.wireframe;
-		//materialInvader.wireframe = !materialInvader.wireframe;
+		changeWireframe();
 		break;
 	//Dispara um tiro
 	case 66: //B
 	case 98: //b
 		gf_tiros = true;
-		disparaTiro();
+		disparaTiro(gf_gouraud);
+		break;
+	//ativa e desativa as estrelinhas(Point Light)
+	case 67: //c
+	case 99: //c
+		if(gf_basic == false){
+			gf_pointLight = !gf_pointLight;
+		}
+		break;
+	//Sombreamento Gouraud e Phong
+	case 71: //G
+	case 103: //g
+		gf_gouraud = !gf_gouraud;
+		gf_basic = false;		
+		changeMaterial();		
+		break;
+	//Ativa/desativa calculo da iluminacao
+	case 76: //L
+	case 108: //l
+		gf_basic = !gf_basic;		
+		changeMaterial();
+		break;
+	//Ativa luz
+	case 78: //N
+	case 110: //n
+		//So e possivel alterar se estivermos em modo Phong/Gouraund
+		if(gf_basic == false){
+			gf_dirlight = !gf_dirlight;
+		}
+		break;
+	//Pausa
+	case 80: //P
+	case 113: //p
+		console.log("p", gf_pause);
+		gf_pause = !gf_pause;
 		break;
 	//nave a mover para a esquerda
 	case 37: //seta esquerda (<-)
@@ -51,6 +79,8 @@ function onKeyDown(e){
 		gf_cameraPrespective2 = true;
 		break;
 	}
+	//imprime os materiais, e as variaveis
+	printSombr();
 }
 
 //verifica se alguma tecla que estava a ser permida deixou de o ser
@@ -93,4 +123,64 @@ function onResize() {
 		camera.bottom = -limite/rel_asp;
 	}
 	camera.updateProjectionMatrix();
+}
+
+function changeWireframe(){
+	'use strict';
+
+	scene.traverse(function (node){
+		if (node instanceof THREE.Mesh) {
+			node.material.wireframe = !node.material.wireframe;
+		}
+	});
+	//materialNave.wireframe = !materialNave.wireframe
+	materialCampo.wireframe = false;
+}
+
+function changeMaterial(){
+	invaderListTemp = [];
+	tiroListTemp = [];
+	naveListTemp = [];
+	
+	createCampo(0, 0, -3.5, gf_gouraud);
+
+	if(naveList.length == 1){
+		scene.remove(naveList[0]);
+		naveListTemp.push(naveList[0]);
+	}
+	naveList = [];
+	for(i = 0; i < naveListTemp.length; i++){
+		createNave(naveListTemp[i].position.x, -70, 0, gf_gouraud);
+	}
+	
+	//INVADER
+	for (i=0; i < invaderList.length; i++){
+		scene.remove(invaderList[i].inv);
+		invaderListTemp.push(invaderList[i]);
+	}	
+	
+	invaderList = [];
+	
+	for (i=0; i < invaderListTemp.length; i++){
+		createInvader(invaderListTemp[i].inv.position.x, 
+						invaderListTemp[i].inv.position.y, 
+							invaderListTemp[i].inv.position.z, gf_gouraud,
+								invaderListTemp[i].speedXX,
+									invaderListTemp[i].speedYY)
+	}
+	
+	//TIRO
+	for (i=0; i < tiroList.length; i++){
+		scene.remove(tiroList[i]);
+		tiroListTemp.push(tiroList[i]);
+	}	
+	
+	tiroList = [];
+	
+	for (i=0; i < tiroListTemp.length; i++){
+		createTiro(tiroListTemp[i].position.x, 
+						tiroListTemp[i].position.y, 
+							tiroListTemp[i].position.z, gf_gouraud)
+	}	
+		
 }

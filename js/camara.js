@@ -51,6 +51,6 @@ function alternaCamera(){
 	}
 	//carregou na tecla 3 -> camera em prespetiva2 ativada
 	else if((gf_cameraOrtogonal == false) && (gf_cameraPrespective1 == false) && (gf_cameraPrespective2 == true)){
-		createCameraPrespective2(nave.position.x, -100, 30);
+		createCameraPrespective2(nave.position.x, -80, 10);
 	}
 }

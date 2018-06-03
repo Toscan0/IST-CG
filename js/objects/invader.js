@@ -26,11 +26,23 @@ function addArmInvader(obj, material, x, y, z){
 
 }
 
-function createInvader(x, y, z){
+function createInvader(x, y, z, met, vX, vY){
 	'use strict'
 
 	invader = new THREE.Object3D();
-	materialInvader = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true});
+	
+	//cor: 0xffffff -> branco
+	if(gf_basic == true){
+		materialInvader = new THREE.MeshBasicMaterial({ color: 0xffffff});
+	}
+	else{ //gf_basic == false
+		if(met == false){
+			materialInvader = new THREE.MeshPhongMaterial({ color: 0xffffff, specular:  0x222222, shininess: 50});
+		}
+		else{
+			materialInvader = new THREE.MeshLambertMaterial({ color: 0xffffff});
+		}
+	}
 
 	addFaceInvader(invader,materialInvader, 0, 0, 0);
 	addArmInvader(invader, materialInvader, 3.25, -2, 0.25); 
@@ -41,22 +53,36 @@ function createInvader(x, y, z){
 		y : y,
 		z : z,
 	};
-
+	
 	invader.position.x = x;
 	invader.position.y = y;
 	invader.position.z = z;
-
-	var invaderAux = {
+	
+	scene.add(invader);
+	if (vX == 0){
+		var invaderAux = {
 		inv : invader,
 		moveXX : true ,
 		moveYY : true ,
 		speedXX : randomSpeed(),
 		speedYY : randomSpeed(),
 		position : {x:x, y:y, z:z}
-	};
+		};
+	}else{
+		var invaderAux = {
+		inv : invader,
+		moveXX : true ,
+		moveYY : true ,
+		speedXX : vX,
+		speedYY : vY,
+		position : {x:x, y:y, z:z}
+		};
+	}
 	
+
 	invaderList.push(invaderAux);
 }
+
 
 function sceneAddInvader(){
 	'use strict';
@@ -65,4 +91,13 @@ function sceneAddInvader(){
 	for (i=0; i < invaderList.length; i++){
 			scene.add(invaderList[i].inv);
 	}
+}
+
+//coloca 4 invaderes numa derteminada altura 'y'
+function colocaInvader( y, met){
+	'use strict';
+	createInvader(-50, y, 0, met, 0, 0);
+	createInvader(-25, y, 0, met, 0, 0);
+	createInvader(25, y, 0, met, 0, 0);
+	createInvader(50, y, 0, met, 0, 0);
 }
