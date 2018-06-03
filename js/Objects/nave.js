@@ -26,7 +26,10 @@ var vertices = [//base da nave
  new THREE.Vector3(-0.5, -1.5, 0.5),
  new THREE.Vector3(-0.5, 1.5, 0.5),
  new THREE.Vector3(0.5, -1.5, 0.5),
- new THREE.Vector3(0.5, 1.5, 0.5)];
+ new THREE.Vector3(0.5, 1.5, 0.5),
+
+ //Asa Esquerda
+ new THREE.Vector3(-10, 0, 0)];
 
 var triangles;
 
@@ -41,6 +44,7 @@ function addNave(obj, material, x, y ,z, vx, vy, vz){
 	geometry.faces.push(new THREE.Face3(vx, vy, vz));
 
 	geometry.computeFaceNormals();
+	geometry.computeVertexNormals();
     geometry.mergeVertices();
     
 	mesh = new THREE.Mesh(geometry, material);
@@ -49,27 +53,8 @@ function addNave(obj, material, x, y ,z, vx, vy, vz){
 	obj.add(mesh);
 }
 
-function createNave(x, y, z, met){
-	'use strict'
-
-	nave = new THREE.Object3D();
-
-	//cor: 0x00ff00 -> verde
-	if(gf_basic == true){
-		materialNave = new THREE.MeshBasicMaterial({color:0x00ff00});
-	}
-	else{
-		if(met == false){
-			materialNave = new THREE.MeshPhongMaterial({color: 0x007700, specular: 0x222222, shininess: 30});
-		}
-		else{
-			materialNave = new THREE.MeshLambertMaterial({color: 0x00ff00});
-		}
-	}	
-
-	nave.userData = {moverEsquerda: false, moverDireita: false};
-
-	// ---------------- BASE DA NAVE -------------------
+function drawNave (nave, x, y, z, materialNave){
+			// ---------------- BASE DA NAVE -------------------
 	addNave(nave, materialNave, 0, 0, 0, 0, 1, 2);
 	addNave(nave, materialNave, 0, 0, 0, 1, 3, 2);
 	addNave(nave, materialNave, 0, 0, 0, 1, 3, 2); //extra for wireframe transverse
@@ -121,11 +106,52 @@ function createNave(x, y, z, met){
 	addNave(nave, materialNave, 0, 6, 0, 18, 19, 22);
 	addNave(nave, materialNave, 0, 6, 0, 22, 19, 23);
 	
-	scene.add(nave);
+}
+
+function createNave(x, y, z, met){
+	'use strict'
+
+	nave = new THREE.Object3D();
+
+	//cor: 0x00ff00 -> verde
+	if(gf_basic == true){
+		materialNave = new THREE.MeshBasicMaterial({color:0x00ff00});
+	}
+	else{
+		if(met == false){
+			materialNave = new THREE.MeshPhongMaterial({color: 0x00ff00, specular: 0x222222, shininess: 50});
+		}
+		else{
+			materialNave = new THREE.MeshLambertMaterial({color: 0x00ff00});
+		}
+	}	
 	
+
+	drawNave(nave, x, y, z, materialNave);
 	nave.position.x = x;
 	nave.position.y = y;
 	nave.position.z = z;
 
+	scene.add(nave);
+	
 	naveList.push(nave);	
+}
+
+function createVidasNave(cor, x, y, z){
+	'use strict'
+
+	naveVida = new THREE.Object3D();
+
+	//cor: 0x00ff00 -> verde
+	materialNave2 = new THREE.MeshBasicMaterial({color: cor});
+
+	drawNave(naveVida, x, y, z, materialNave2);
+
+	naveVida.position.x = x;
+	naveVida.position.y = y;
+	naveVida.position.z = z;
+	
+	scene.add(naveVida);
+	
+	vidasList.push(naveVida);	
 }

@@ -1,16 +1,30 @@
+/*  Projeto de CG, G27 => Space Invader
+ *	
+ *	start chrome --allow-file-access-from-files
+ *
+ *	if Python 2:
+ *		python -m SimpleHTTPServer
+ *  if Python 3:
+ *  	python -m http.server
+ *	
+ *	http://localhost:8000/....directoria..../index.html
+*/
+
 /*-----Var Globais---*/
 var camera, scene, renderer;
+var camera2;
 var geometry, mesh;
 var clock;
 var limite = 80, raio = 5.66;
-var t; //t = clock.getDelta();
-var gf_gouraud = false, gf_basic = true;
+var t = 0; //t = clock.getDelta();
+
 /*----Var_Invader---*/
 var invader, materialInvader, invaderList = [], invaderListTemp = [], possibleSpeed = [-15, 15];
 
 /*--Var_Nave--*/
-var nave, materialNave, naveList =  [];;
+var nave, naveVida, materialNave, materialNave2, naveList =  [];
 var aceleracao = 50, velocidade = 0, Vmax = 30, Vmin = -30;
+var vidasNave = 3, vidasList = [];
 
 /*--Var_tiro--*/
 var tiro, materialTiro, gf_tiros = false, gf_reoladed = true, tiroList = [], tiroListTemp = []; 
@@ -20,19 +34,19 @@ var velTiro = 50;
 var gf_cameraOrtogonal = true, gf_cameraPrespective1 = false, gf_cameraPrespective2 = false;
 
 /*--Var_Campo--*/
-var campo, materialCampo;
+var campo, materialCampo, loaderCampo, textureCampo = [];
 
 /*--Luzes--*/
+var gf_gouraud = false, gf_basic = true;
 /*--Directional Light--*/
-var dirLight, gf_dirlight = true, dirLightCreate = 0, dirLightList = [];
+var dirLight, gf_dirlight = true, dirLightList = [];
 /*--Point Light--*/
-var redPoint, gf_pointLight = false, pointLightCreate = 0, pointLightList = [];
+var whitePoint, gf_pointLight = false, pointLightList = [];
+/*--Spot Light*/
+var spotLight, gf_spotLight = false;
 
 /*--Resultado--*/
-var gf_pause = false;
-
-/*--Controlos--*/
-var controls;
+var gf_pause = false, gf_terminou = false;
 
 /*-----------Chamadas no index--------------------------*/
 function init() {
@@ -41,93 +55,152 @@ function init() {
 	clock = new THREE.Clock();
 	clock.start();
 
-	//cria uma cena
-	createScene();
-	
 	//Cria o WebGL Renderer
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize(window.innerWidth, window.innerHeight);
+	//renderer.autoClear = false;
 
 	//Junta o renderer ao body do HTML
 	document.body.appendChild(renderer.domElement);
 
-	createCameraOrtogonal();
-
+	//cria uma cena
+	createScene();
+	
 	window.addEventListener("resize", onResize);
 	window.addEventListener("keydown", onKeyDown);
 	window.addEventListener("keyup", onKeyUp);
-
-	// Add the orbit controls
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target = new THREE.Vector3(0, 0, -1.5);	
 }
 
-function animate(){
-	'use strict';
-
-	render();
-	requestAnimationFrame(animate);
-	//se estiver a falso e porque o somrebamento Phong ou gouraud esta ligado
-	if(gf_basic == false){
-		//cria luzes ambiente
-		addDirecionalLight();
-		//cria pontos de luz
-		addPointLight();
-	}
-	alternaCamera();
-	moveObjects();
-
-	controls.update();
-}
-
-
-function createScene() {
+function createScene(){
 	'use strict';
 
 	//Cria uma cena
 	scene = new THREE.Scene();
+	//scene2 = new THREE.Scene();
 	
 	//Cria um eixo auxiliar de tamanho 80
 	//descomente as duas linhas seguintes se desejas que este aparace no ecra
 	//scene.add(new THREE.AxisHelper(limite)); //eixos postivios
 	//scene.add(new THREE.AxisHelper(-limite)); //eixos negativos
 
-	createCampo(0, 0, -3.5, false);
-
-	//cria uma linha com quatro invaderes, a uma determinada altura
-	colocaInvader(0);
-	colocaInvader(40);
-	//sceneAddInvader();
-	//cria a nave
-	createNave(0, -70, 0, false);
+	addObjects();
 }
 
 function render() {
 	'use strict';
 
+	//renderer.clear();
+
+	//renderer.setViewport(window.innerWidth * 0,window.innerHeight * 0, window.innerWidth* 0.5, window.innerHeight*1);
+	//ecra de jogo normal
+	renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+	renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
+	renderer.setScissorTest(true);
 	renderer.render(scene, camera);
+
+	//vidas nave
+	renderer.setViewport(window.innerWidth * 0.01,window.innerHeight * 0, window.innerWidth*0.14, window.innerHeight*1);
+	renderer.setScissor(window.innerWidth * 0.01,window.innerHeight * 0, window.innerWidth*0.14, window.innerHeight*1);
+	renderer.setScissorTest(true);
+	renderer.render(scene, camera2);
+
+	//pausa
+	if((gf_terminou == true) || (gf_pause == true)){
+		renderer.setViewport(window.innerWidth*0.15, window.innerHeight*0, window.innerWidth*0.85, window.innerHeight*1);
+		renderer.setScissor(window.innerWidth*0.15, window.innerHeight*0, window.innerWidth*0.85, window.innerHeight*1);
+		renderer.setScissorTest(true);
+		renderer.render(scene, camera3);
+	}
 }
 
+function animate(){
+	'use strict';
+	var i;
 
-function printSombr(){
+	render();
+	requestAnimationFrame(animate);
+
+	//desliga ou liga as luzes
+	addDirecionalLight();
+	for(i = 0; i < pointLightList.length; i++){
+		//desliga ou liga as luzes
+		addPointLight(i);
+	}
+	//desliga ou liga as luzes
+	addSpotLight();
+
+	alternaCamera();
+	moveObjects();
+
+	resultado();
+}
+
+function addObjects(){
 	'use strict';
 
-	console.log("-----------------Begin Print-----------------");
-	console.log(">>>gf_pointLight:", gf_pointLight);
-	console.log(">>>gf_dirlight:", gf_dirlight);
-	console.log(">>>gf_basic:", gf_basic);
-	console.log(">>>gf_gouraud:", gf_gouraud);
-	console.log("matCampo:", materialCampo);
-	if(invaderList.length > 0){
-		//so imprime o ultimo invader
-		console.log("matInv:", materialInvader);
+	createCameraOrtogonal();
+	createCameraOrtogonal2();
+	createCameraOrtogonal3();
+
+	createMsg(20000, 50, 0);
+	createCampo(0, 0, -3.5);
+
+	createInterectiveObjects();
+}
+
+function createInterectiveObjects(){
+	
+	//flags
+	gf_tiros = false;
+	velocidade = 0;
+	vidasNave = 3;
+
+	gf_cameraOrtogonal = true;
+	gf_cameraPrespective1 = false;
+	gf_cameraPrespective2 = false;
+	 
+	gf_gouraud = false;
+	gf_basic = true;
+	/*--Directional Light--*/
+	gf_dirlight = true;
+	/*--Point Light--*/
+	gf_pointLight = false;
+	/*--Spot Light*/
+	gf_spotLight = false;
+	/*--Resultado--*/
+	gf_pause = false;
+	gf_terminou = false;
+	scene.remove(dirLight);
+	scene.remove(spotLight);
+	for(i = 0; i < pointLightList.length; i++){
+		scene.remove(pointLightList[i]);
 	}
-	if(naveList.length > 0){
-		console.log("matNave:", materialNave);
-	}
-	if(tiroList.length > 0){
-		//so imprime o ultimo tiro
-		console.log("matTiro:", materialTiro);
-	}
-	console.log("------------------End Print------------------");
+	
+	
+	//cria uma linha com quatro invaderes, a uma determinada altura
+	colocaInvader(0);
+	colocaInvader(40);
+
+	//cria a nave
+	createNave(0, -70, 0, false);
+
+	createVidasNave(0x00ff00, -20000, 54.25, 0, false);
+	createVidasNave(0x00ff00,-20000, 44.25, 0, false);
+	createVidasNave(0x00ff00,-20000, 35, 0, false);
+	
+	//cria o spotlight
+	createSpotLight(0xffffff, 3, 100, Math.PI/4);
+	
+	//cria a luz direcional
+	createDirecionalLight(0xffffff, 5);
+	
+	//createPointLight(color, intens, dis, 0, 0, 0);
+	createPointLight(0xffffff, 2, 150, -50, 0, 100);
+	createPointLight(0xffffff, 2, 150,-50, 60, 100);
+	createPointLight(0xffffff, 2, 150, -50, -60, 100);
+	createPointLight(0xffffff, 2, 150, 50, 0, 100);
+	createPointLight(0xffffff, 2, 150, 50, 60, 100);
+	createPointLight(0xffffff, 2, 150, 50, -60, 100);
+	
+
 }

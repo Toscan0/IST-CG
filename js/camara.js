@@ -14,11 +14,33 @@ function createCameraOrtogonal(){
 	camera.lookAt(scene.position);
 }
 
+function createCameraOrtogonal2(){
+	'use strict';
+
+	camera2 = new THREE.OrthographicCamera( -5, 5, 15, -15, -100, 100 );
+
+	camera2.position.x = -20000;
+	camera2.position.y = 45;
+	camera2.position.z = 5;
+	camera2.lookAt(new THREE.Vector3(-20000, 45, 0));
+}
+
+var camera3;
+function createCameraOrtogonal3(){
+	'use strict';
+
+	camera3 = new THREE.OrthographicCamera( -40, 40, 40, -40, -100, 100 );
+
+	camera3.position.x = 20000;
+	camera3.position.y = 50;
+	camera3.position.z = 5;
+	camera3.lookAt(new THREE.Vector3(20000, 50, 0));
+}
+
 //Camera em perpestiva-> camera estatica
 function createCameraPrespective1(){
 	'use strict';
 	
-
 	camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 1000);
 	camera.position.x = 0;
 	camera.position.y = -105;

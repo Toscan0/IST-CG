@@ -1,38 +1,37 @@
+//mudar -> luz.visible
+
 /*--Lights--*/
+function createDirecionalLight(cor, intens){
+	'use strict';
+	
+
+	//branco 0xffffff
+	dirLight = new THREE.DirectionalLight(cor, intens);
+	dirLight.position.set(-300, -300, 75);
+    
+    //Se quiser que a luz direcional aponte para um determinado ponto
+    //Descomente  as proximas duas linhas
+    //dirLight.target.position.set(0,0,0);
+    //dirLight.target.updateMatrixWorld();
+    
+    scene.add(dirLight);
+    
+    //Cria um objeto na posicao da luz direcional
+    //scene.add(new THREE.DirectionalLightHelper(dirLight,0.2));
+    
+    dirLightList.push(dirLight);
+}
+
 function addDirecionalLight(){
 	'use strict';
 
-	if(gf_dirlight == true){
-		if(dirLightCreate == 1){
-			createDirecionalLight();
-		}
-		dirLightCreate++;
+	if(gf_dirlight == false){
+		dirLight.visible = false;
 	}
 	else{
-		dirLightCreate = 0;
-		var i;
-		for(i = 0; i < dirLightList.length; i++){
-			scene.remove(dirLightList[i]);
-            dirLightList.splice(i, 1);
-		}
+		dirLight.visible = true;
 	}
-}
 
-function createDirecionalLight(){
-	'use strict';
-	
-	//ff6600 b3b300
-	//branco 0xffffff
-	//o que estava 0xff6600
-	dirLight = new THREE.DirectionalLight(0xffffff, 5);
-	dirLight.position.set(-300, -300, 75);
-    	dirLight.target.position.set(0,0,0);
-    	dirLight.target.updateMatrixWorld();
-    
-    scene.add(dirLight);
-    scene.add(new THREE.DirectionalLightHelper(dirLight,0.2));
-    
-    dirLightList.push(dirLight);
 }
 
 function createPointLight(color, intens, dis, posX, posY, posZ){
@@ -48,35 +47,40 @@ function createPointLight(color, intens, dis, posX, posY, posZ){
     pointLightList.push(whitePoint);
 }
 
-function addPointLight(){
+function addPointLight(i){
 	'use strict';
 
-	if(gf_pointLight == true){
-		//Cria novos PointLight
-		if(pointLightCreate == 1){
-			var color = 0xffffff; //white
-			var intens = 2;
-			var dis = 150;
-			var posX = 50;
-			var posZ = 100;
-
-			//createPointLight(color, intens, dis, 0, 0, 0);
-			createPointLight(color, intens, dis, -posX, 0, posZ);
-			createPointLight(color, intens, dis,-posX, 60, posZ);
-			createPointLight(color, intens, dis, -posX, -60, posZ);
-			createPointLight(color, intens, dis, posX, 0, posZ);
-			createPointLight(color, intens, dis, posX, 60, posZ);
-			createPointLight(color, intens, dis, posX, -60, posZ);
-		}
-		pointLightCreate++;
+	if(gf_pointLight == false){
+		pointLightList[i].visible = false;
 	}
 	else{
-		//remove os pontosLight anteriores
-		pointLightCreate = 0;
-		var i;
-		for(i=0; i < pointLightList.length; i++){
-			scene.remove(pointLightList[i]);
-            pointLightList.splice(i, 1);
-		}
+		pointLightList[i].visible = true;
+	}
+}
+
+
+function createSpotLight(cor, intens, dis, angulo){
+	'use strict';
+
+	spotLight = new THREE.SpotLight(cor, intens, dis, angulo);
+    spotLight.position.set(nave.position.x, nave.position.y-3, 6);
+  
+    spotLight.target.position.set(nave.position.x, nave.position.y+140, 0);
+  	
+  	scene.add(spotLight);
+    scene.add(spotLight.target);
+
+    //Cria um ponto no sitio onde e criado  luz
+    //scene.add(new THREE.PointLightHelper(spotLight, 1));
+}
+
+function addSpotLight(){
+	'use strict';
+
+	if(gf_spotLight == false){
+		spotLight.visible = false;
+	}
+	else{
+		spotLight.visible = true;
 	}
 }

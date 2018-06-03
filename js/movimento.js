@@ -3,7 +3,10 @@ function moveObjects(){
     'use strict';
 
     t = clock.getDelta();
-
+    //pausa ativa
+    if(gf_pause == true){
+        t = 0;
+    }
     moveNave();
     tirosLimiteColision();
     moveInvader();
@@ -48,6 +51,9 @@ function moveNave(){
     //camera em prespetiva2 ativa
     if((gf_cameraOrtogonal == false) && (gf_cameraPrespective1 == false) && (gf_cameraPrespective2 == true)){
         camera.position.x += velocidade*t;
-    }
+    } 
 
+    spotLight.position.set(nave.position.x, nave.position.y-3, 6);
+    spotLight.target.position.set(nave.position.x, nave.position.y+140, 0);
+    //spotLight.target.updateMatrixWorld();
 }

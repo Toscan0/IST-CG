@@ -5,6 +5,18 @@ function intersect(a, b) {
     return  (a.position.x - 4.1<= b.position.x + 4.1 && a.position.x + 4.1 >= b.position.x - 4.1) && 
     (a.position.y - 4.1 <= b.position.y + 2.1 && a.position.y + 2.1 >= b.position.y - 4.1);
 }
+
+function intersectAlienNave(alien, ship) {
+    //a - alien; n - nave
+    'use strict';
+    var interBase = (alien.position.x - 4.1 <= ship.position.x + 5.1 && alien.position.x + 4.1 >= ship.position.x - 5.1) && 
+                    (alien.position.y - 4.1 <= ship.position.y + 2.6 && alien.position.y + 2.1 >= ship.position.y - 2.6);
+    var interMedia = (alien.position.x - 4.1 <= ship.position.x + 3.1 && alien.position.x + 4.1 >= ship.position.x - 3.1) && 
+                    (alien.position.y - 4.1 <= ship.position.y + 4.6 && alien.position.y + 2.1 >= ship.position.y - 2.6);
+    var interTopo = (alien.position.x - 4.1 <= ship.position.x + 0.6 && alien.position.x + 4.1 >= ship.position.x - 0.6) && 
+                    (alien.position.y - 4.1 <= ship.position.y + 6.2 && alien.position.y + 2.1 >= ship.position.y - 2.6);
+    return  interBase || interMedia || interTopo;
+}
    
 function intersectBala(bala, alien){
     'use strict';
@@ -28,7 +40,7 @@ function tirosLimiteColision(){
      var j, e;
 
         for (j=0; j < tiroList.length; j++){
-            tiroList[j].position.y += velTiro*t;;
+            tiroList[j].position.y += velTiro*t;
             //Para imprimir a posicao da Nave na consola
             //descomente as linhas seguintes
             //console.log("Tiro PositionX:", tiro.position.x);
@@ -41,6 +53,7 @@ function tirosLimiteColision(){
                 tiroList.splice(j, 1);
                 break;
             }
+
             for (e = 0; e < invaderList.length; e++){
                 if (intersectBala(tiroList[j], invaderList[e].inv)){
                 scene.remove(tiroList[j]);
@@ -101,10 +114,41 @@ function moveInvader(){
         }
         //limite lateral inferior
         //os aliens so se movimentam nos quadrantes com eixoYY positivo
-        if(invaderList[i].inv.position.y <= -20+1.5){
+        if(invaderList[i].inv.position.y <= -limite+10){
             invaderList[i].speedYY = -invaderList[i].speedYY;
         }
     }
+}
+
+function alteraMovimentoAlient (alien){
+    alien.speedXX = -alien.speedXX;
+    alien.speedYY = -alien.speedYY;
+
+    if (alien.speedYY < 0){
+        alien.inv.position.y -= 0.1;   
+    }
+    else{
+        alien.inv.position.y += 0.1;   
+    }
+    if (alien.speedXX < 0){
+        alien.inv.position.x -= 0.1;                       
+    }else{
+        alien.inv.position.x += 0.1;                       
+    }
+}
+
+function colisaoAlienNave(){
+    naveListTemp = [];
+
+    if(naveList.length == 1){
+        scene.remove(naveList[0]);
+        naveListTemp.push(naveList[0]);
+    }
+    naveList = [];
+    for(i = 0; i < naveListTemp.length; i++){
+        createNave(0, -70, 0, gf_gouraud);
+    }
+    velocidade = 0;
 }
 
 function invaderInvaderColision(){
@@ -112,38 +156,28 @@ function invaderInvaderColision(){
 
     var i, e;
     for (i = 0; i < invaderList.length - 1; i++){
+        
+        if(intersectAlienNave(invaderList[i].inv, nave)){
+            alteraMovimentoAlient(invaderList[i]);
+            if(vidasNave > 0){
+                colisaoAlienNave();
+                vidasNave -=1;
+                scene.remove(vidasList[vidasNave]);
+                if(vidasNave == 0){
+                    scene.remove(naveList[0]);
+                    naveList.splice(0, 1);
+                    break;
+                }
+            }
+        }
+        
         for (e = i + 1; e < invaderList.length; e++){
             if(intersect(invaderList[i].inv, invaderList[e].inv)){
-                invaderList[i].speedXX = -invaderList[i].speedXX;
-                invaderList[i].speedYY = -invaderList[i].speedYY;
-                if (invaderList[i].speedYY < 0){
-                    invaderList[i].inv.position.y -= 0.1;   
-                }
-                else{
-                    invaderList[i].inv.position.y += 0.1;   
-                }
-                if (invaderList[i].speedXX < 0){
-                    invaderList[i].inv.position.x -= 0.1;                       
-                }else{
-                    invaderList[i].inv.position.x += 0.1;                       
-                }
+                
+                alteraMovimentoAlient(invaderList[i]);
                  
-                invaderList[e].speedXX = -invaderList[e].speedXX;
-                invaderList[e].speedYY = -invaderList[e].speedYY;
-                if (invaderList[e].speedYY < 0){
-                    invaderList[e].inv.position.y -= 0.1;   
-                }else{
-                    invaderList[e].inv.position.y += 0.1;   
-                }
-                if (invaderList[e].speedXX < 0){
-                    invaderList[e].inv.position.x -= 0.1;                       
-                }else{
-                    invaderList[e].inv.position.x += 0.1;                       
-                }
-            }    
+                alteraMovimentoAlient(invaderList[e]);
+            }
         }
     }
 }
-
-
-
